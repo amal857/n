@@ -31,7 +31,7 @@ class _PostsState extends State<Posts> {
         return Card(
           child: Column(
             children: <Widget>[
-              _post()
+              _post(),
               //  _cardHeader(),
               //_cardBody(),
               //_drawLine(),
