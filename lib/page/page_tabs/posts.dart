@@ -14,11 +14,11 @@ class Posts extends StatefulWidget {
 }
 
 class _PostsState extends State<Posts> {
-  void _commentNew(context) {
+  void _commentNew(BuildContext context, String postId) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext builder) {
-        return Comment(widget.documentID);
+        return Comment(widget.documentID, postId);
       },
       isScrollControlled: true,
     );
@@ -190,7 +190,10 @@ class _PostsState extends State<Posts> {
                                         ),
                                       ],
                                     ),
-                                    onPressed: () => _commentNew(context),
+                                    onPressed: () => _commentNew(
+                                        context,
+                                        snapshot
+                                            .data.documents[index].documentID),
                                   )
                                 ],
                               ),
@@ -243,7 +246,10 @@ class _PostsState extends State<Posts> {
                                                   )),
                                             ],
                                           ),
-                                          onPressed: () => _commentNew(context),
+                                          onPressed: () => _commentNew(
+                                              context,
+                                              snapshot.data.documents[index]
+                                                  .documentID),
                                         ),
                                         FlatButton(
                                           child: Row(

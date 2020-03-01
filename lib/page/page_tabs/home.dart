@@ -57,12 +57,12 @@ class _HomeState extends State<Home> {
     _postContentController.dispose();
   }
 
-  _commentButtonPressed() {
+  _commentButtonPressed(String postId) {
     setState(() {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Comment((widget.documentID))));
+              builder: (context) => Comment(widget.documentID, postId)));
     });
   }
 
@@ -79,11 +79,11 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _commentNew(context) {
+  void _commentNew(context, String postId) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext builder) {
-        return Comment((widget.documentID));
+        return Comment(widget.documentID, postId);
       },
       isScrollControlled: true,
     );
@@ -611,7 +611,10 @@ class _HomeState extends State<Home> {
                                         ),
                                       ],
                                     ),
-                                    onPressed: () => _commentNew(context),
+                                    onPressed: () => _commentNew(
+                                        context,
+                                        snapshot
+                                            .data.documents[index].documentID),
                                   )
                                 ],
                               ),
@@ -700,7 +703,10 @@ class _HomeState extends State<Home> {
                                                   )),
                                             ],
                                           ),
-                                          onPressed: () => _commentNew(context),
+                                          onPressed: () => _commentNew(
+                                              context,
+                                              snapshot.data.documents[index]
+                                                  .documentID),
                                         ),
                                         FlatButton(
                                           child: Row(

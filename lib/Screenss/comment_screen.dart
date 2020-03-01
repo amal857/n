@@ -3,8 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Comment extends StatefulWidget {
+  final String postId;
   final String documentID;
-  Comment(this.documentID, {Key key}) : super(key: key);
+  Comment(this.documentID, this.postId, {Key key}) : super(key: key);
   @override
   _CommentState createState() => _CommentState();
 }
@@ -52,7 +53,7 @@ class _CommentState extends State<Comment> {
                       .collection('pages')
                       .document(widget.documentID)
                       .collection('post')
-                      .document(widget.documentID)
+                      .document(widget.postId)
                       .collection('comment')
                       .getDocuments(),
                   builder: (BuildContext context,
