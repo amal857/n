@@ -21,6 +21,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  int getLikeCount(likes) {
+    // if no likes, return 0
+    if (likes == null) {
+      return 0;
+    }
+
+    int count = 0;
+
+    // if the key is explicitly set to true, add a like
+
+    likes.values.forEach((val) {
+      if (val == true) {
+        count += 1;
+      }
+    });
+
+    return count;
+  }
+
   final _formKey = GlobalKey<FormState>();
   File _image1;
   TextEditingController _postContentController = TextEditingController();
@@ -68,6 +87,14 @@ class _HomeState extends State<Home> {
       },
       isScrollControlled: true,
     );
+  }
+
+  void _isliked(likes) {
+    setState(() {
+      if (likes == true)
+        valueColor:
+        AlwaysStoppedAnimation(Colors.blue);
+    });
   }
 
   @override
@@ -173,17 +200,14 @@ class _HomeState extends State<Home> {
               'Post',
               style: TextStyle(color: Color(0xFF9656A1), fontSize: 18),
             ),
-            onPressed: ()
-                // async
-                async {
+            onPressed: () async {
               if (_formKey.currentState.validate()) {
                 String imageUrl1 = await uploadImage(_image1);
                 Firestore.instance
                     .collection('pages')
                     .document(widget.documentID)
                     .collection('post')
-                    .document(widget.documentID)
-                    .setData({
+                    .add({
                   'post_content': _postContentController.text,
                   'post_image': imageUrl1,
                   'userid': "5arJBmgyMNlJgLKyvldS",
@@ -607,23 +631,59 @@ class _HomeState extends State<Home> {
                                     child: Row(
                                       children: <Widget>[
                                         FlatButton(
-                                          child: Row(
-                                            children: <Widget>[
-                                              IconButton(
-                                                  icon: Icon(
-                                                    Icons.thumb_up,
-                                                    size: 18,
-                                                  ),
-                                                  color: Colors.grey.shade800,
-                                                  onPressed: () {}),
-                                              Text('Like',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                  )),
-                                            ],
-                                          ),
-                                          onPressed: () {},
-                                        ),
+                                            child: Row(
+                                              children: <Widget>[
+                                                IconButton(
+                                                    icon: Icon(
+                                                      Icons.thumb_up,
+                                                      size: 18,
+                                                    ),
+                                                    color: Colors.grey.shade800,
+                                                    onPressed: () {}),
+                                                Text('Like',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    )),
+                                              ],
+                                            ),
+                                            onPressed: () async {
+                                              if (_formKey.currentState
+                                                  .validate()) {
+                                                Firestore.instance
+                                                    .collection('pages')
+                                                    .document(widget.documentID)
+                                                    .collection('post')
+                                                    .document(widget.documentID)
+                                                    .collection('like')
+                                                    .document(widget.documentID)
+                                                    .setData({
+                                                  'islike': _isliked,
+                                                  'likecount': getLikeCount,
+                                                  'userid':
+                                                      "5arJBmgyMNlJgLKyvldS",
+                                                  'username': 'amal',
+                                                  'timetamp':
+                                                      DateTime.now().toString(),
+                                                });
+                                                Firestore.instance
+                                                    .collection('ActivtyLog')
+                                                    .document('ParentId')
+                                                    .collection(
+                                                        'ActivtyLogitem')
+                                                    .document()
+                                                    .setData({
+                                                  'post_content':
+                                                      _postContentController
+                                                          .text,
+                                                  'userid':
+                                                      "5arJBmgyMNlJgLKyvldS",
+                                                  'username': 'amal',
+                                                  'type': 'post',
+                                                  'timetamp':
+                                                      DateTime.now().toString(),
+                                                });
+                                              }
+                                            }),
                                         FlatButton(
                                           child: Row(
                                             children: <Widget>[

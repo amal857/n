@@ -4,33 +4,19 @@ import 'package:flutter/material.dart';
 
 class Comment extends StatefulWidget {
   final String documentID;
-
   Comment(this.documentID, {Key key}) : super(key: key);
   @override
   _CommentState createState() => _CommentState();
 }
 
 class _CommentState extends State<Comment> {
-  final _formKey2 = GlobalKey<FormState>();
-
-  TextEditingController _commentContentController = TextEditingController();
-
-  @override
-  void dispose() {
-    super.dispose();
-    _commentContentController.dispose();
-  }
+  static final GlobalKey<FormFieldState<String>> _commentController =
+      GlobalKey<FormFieldState<String>>();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: _createcomment(),
-    );
-  }
-
-  Widget _createcomment() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
+      height: MediaQuery.of(context).size.height * 0.964,
       child: Scaffold(
         backgroundColor: Colors.white, //Color(0xFFcccccc),
         appBar: AppBar(
@@ -58,26 +44,26 @@ class _CommentState extends State<Comment> {
                 ],
               )),
         ),
-        body: FutureBuilder(
-            future: Firestore.instance
-                .collection('pages')
-                .document(widget.documentID)
-                .collection('post')
-                .document(widget.documentID)
-                .collection('comment')
-                .getDocuments(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError)
-                return new Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return new Text('Loading...');
-                default:
-                  return Column(
-                    children: <Widget>[
-                      Expanded(
-                        child: ListView.builder(
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: FutureBuilder(
+                  future: Firestore.instance
+                      .collection('pages')
+                      .document(widget.documentID)
+                      .collection('post')
+                      .document(widget.documentID)
+                      .collection('comment')
+                      .getDocuments(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError)
+                      return new Text('Error: ${snapshot.error}');
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return new Text('Loading...');
+                      default:
+                        return ListView.builder(
                           itemCount: snapshot.data.documents.length,
                           itemBuilder: (context, index) {
                             return Container(
@@ -154,79 +140,76 @@ class _CommentState extends State<Comment> {
                             );
                           },
                           //  itemCount: 20,
-                        ),
+                        );
+                    }
+                  }),
+            ),
+            Divider(height: 2.0),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: (MediaQuery.of(context).size.width * 1 / 26)),
+                    child: TextFormField(
+                      key: _commentController,
+                      decoration: InputDecoration.collapsed(
+                        hintText: "Type a message",
                       ),
-                      Divider(height: 2.0),
-                      Form(
-                        key: _formKey2,
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: (MediaQuery.of(context).size.width *
-                                        1 /
-                                        26)),
-                                child: TextFormField(
-                                  controller: _commentContentController,
-                                  decoration: InputDecoration.collapsed(
-                                    hintText: "Type a message",
-                                  ),
-                                  validator: (value) {
-                                    if (value.isEmpty) {
-                                      return 'message is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              color: Theme.of(context).primaryColor,
-                              icon: Icon(
-                                Icons.send,
-                                color: Colors.deepPurple,
-                              ),
-                              disabledColor: Colors.grey,
-                              onPressed: () async {
-                                if (_formKey2.currentState.validate()) {
-                                  Firestore.instance
-                                      .collection('pages')
-                                      .document(widget.documentID)
-                                      .collection('post')
-                                      .document(widget.documentID)
-                                      .collection('comment')
-                                      .document()
-                                      .setData({
-                                    'comment_content':
-                                        _commentContentController.text,
-                                    'userid': "5arJBmgyMNlJgLKyvldS",
-                                    'username': 'amal',
-                                    'timetamp': FieldValue.serverTimestamp(),
-                                  });
-                                  Firestore.instance
-                                      .collection('ActivtyLog')
-                                      .document('ParentId')
-                                      .collection('ActivtyLogitem')
-                                      .document()
-                                      .setData({
-                                    'comment_content':
-                                        _commentContentController.text,
-                                    'userid': "5arJBmgyMNlJgLKyvldS",
-                                    'username': 'amal',
-                                    'type': 'comment',
-                                    'timetamp': FieldValue.serverTimestamp(),
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-              }
-            }),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'message is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                IconButton(
+                  color: Theme.of(context).primaryColor,
+                  icon: Icon(
+                    Icons.send,
+                    color: Colors.deepPurple,
+                  ),
+                  disabledColor: Colors.grey,
+                  onPressed: () async {
+                    if (_commentController.currentState.value
+                        .trim()
+                        .isNotEmpty) {
+                      Firestore.instance
+                          .collection('pages')
+                          .document(widget.documentID)
+                          .collection('post')
+                          .document(widget.documentID)
+                          .collection('comment')
+                          .document()
+                          .setData({
+                        'comment_content':
+                            _commentController.currentState.value,
+                        'userid': "5arJBmgyMNlJgLKyvldS",
+                        'username': 'amal',
+                        'timetamp': FieldValue.serverTimestamp(),
+                      });
+                      Firestore.instance
+                          .collection('ActivtyLog')
+                          .document('ParentId')
+                          .collection('ActivtyLogitem')
+                          .document()
+                          .setData({
+                        'comment_content':
+                            _commentController.currentState.value,
+                        'userid': "5arJBmgyMNlJgLKyvldS",
+                        'username': 'amal',
+                        'type': 'comment',
+                        'timetamp': FieldValue.serverTimestamp(),
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

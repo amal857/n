@@ -40,6 +40,7 @@ class _PostsState extends State<Posts> {
           ),
         );
       },
+
       // itemCount: 20,
     );
   }
@@ -451,7 +452,7 @@ class _PostsState extends State<Posts> {
     );
   }
 
- */
+
 
 Widget _drawLine() {
   return Container(
@@ -459,3 +460,5 @@ Widget _drawLine() {
     color: Colors.grey.shade300,
   );
 }
+
+ */
