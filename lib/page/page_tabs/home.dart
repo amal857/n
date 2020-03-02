@@ -40,6 +40,7 @@ class _HomeState extends State<Home> {
     return count;
   }
 
+  bool isLiked = false;
   final _formKey = GlobalKey<FormState>();
   File _image1;
   TextEditingController _postContentController = TextEditingController();
@@ -87,14 +88,6 @@ class _HomeState extends State<Home> {
       },
       isScrollControlled: true,
     );
-  }
-
-  void _isliked(likes) {
-    setState(() {
-      if (likes == true)
-        valueColor:
-        AlwaysStoppedAnimation(Colors.blue);
-    });
   }
 
   @override
@@ -467,12 +460,12 @@ class _HomeState extends State<Home> {
   }
 
   Widget _post() {
-    return FutureBuilder(
-        future: Firestore.instance
+    return StreamBuilder(
+        stream: Firestore.instance
             .collection('pages')
             .document(widget.documentID)
             .collection('post')
-            .getDocuments(),
+            .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
@@ -535,7 +528,78 @@ class _HomeState extends State<Home> {
                                   ],
                                 ),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            height: 200,
+                                            child: Wrap(
+                                              children: <Widget>[
+                                                FlatButton(
+                                                  onPressed: () async {
+                                                    await Firestore.instance
+                                                        .collection('pages')
+                                                        .document(
+                                                            widget.documentID)
+                                                        .collection('post')
+                                                        .document(snapshot
+                                                            .data
+                                                            .documents[index]
+                                                            .documentID)
+                                                        .collection('comment')
+                                                        .getDocuments()
+                                                        .then((snapshot) {
+                                                      for (DocumentSnapshot ds
+                                                          in snapshot
+                                                              .documents) {
+                                                        ds.reference.delete();
+                                                      }
+                                                    });
+                                                    await Firestore.instance
+                                                        .collection('pages')
+                                                        .document(
+                                                            widget.documentID)
+                                                        .collection('post')
+                                                        .document(snapshot
+                                                            .data
+                                                            .documents[index]
+                                                            .documentID)
+                                                        .delete();
+                                                  },
+                                                  child: ListTile(
+                                                    title: Text(
+                                                      'Delete Post',
+                                                      style: TextStyle(
+                                                          color: Colors
+                                                              .purpleAccent),
+                                                    ),
+                                                    leading: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.pink,
+                                                    ),
+                                                  ),
+                                                ),
+                                                FlatButton(
+                                                  onPressed: () {},
+                                                  child: ListTile(
+                                                    title: Text(
+                                                      'Edit Post',
+                                                      style: TextStyle(
+                                                          color: Colors
+                                                              .purpleAccent),
+                                                    ),
+                                                    leading: Icon(
+                                                      Icons.edit,
+                                                      color: Colors.pink,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        });
+                                  },
                                   icon: Icon(Icons.more_horiz),
                                   padding: EdgeInsets.only(
                                     left: (MediaQuery.of(context).size.width *
@@ -636,38 +700,69 @@ class _HomeState extends State<Home> {
                                         FlatButton(
                                             child: Row(
                                               children: <Widget>[
-                                                IconButton(
-                                                    icon: Icon(
-                                                      Icons.thumb_up,
-                                                      size: 18,
-                                                    ),
-                                                    color: Colors.grey.shade800,
-                                                    onPressed: () {}),
+                                                Icon(
+                                                  Icons.thumb_up,
+                                                  size: 18,
+                                                  color: isLiked
+                                                      ? Colors.blue
+                                                      : Colors.grey.shade800,
+                                                ),
                                                 Text('Like',
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                     )),
                                               ],
                                             ),
-                                            onPressed: () async {
-                                              if (_formKey.currentState
-                                                  .validate()) {
+                                            onPressed: () {
+                                              setState(() {
+                                                isLiked = !isLiked;
+                                              });
+                                              if (isLiked) {
                                                 Firestore.instance
                                                     .collection('pages')
                                                     .document(widget.documentID)
                                                     .collection('post')
-                                                    .document(widget.documentID)
+                                                    .document(snapshot
+                                                        .data
+                                                        .documents[index]
+                                                        .documentID)
                                                     .collection('like')
-                                                    .document(widget.documentID)
+                                                    .document(
+                                                        "5arJBmgyMNlJgLKyvldS")
                                                     .setData({
-                                                  'islike': _isliked,
-                                                  'likecount': getLikeCount,
+                                                  'userid':
+                                                      "5arJBmgyMNlJgLKyvldS"
+                                                });
+                                                Firestore.instance
+                                                    .collection('ActivtyLog')
+                                                    .document('ParentId')
+                                                    .collection(
+                                                        'ActivtyLogitem')
+                                                    .document()
+                                                    .setData({
+                                                  'post_content':
+                                                      _postContentController
+                                                          .text,
                                                   'userid':
                                                       "5arJBmgyMNlJgLKyvldS",
                                                   'username': 'amal',
+                                                  'type': 'post',
                                                   'timetamp':
                                                       DateTime.now().toString(),
                                                 });
+                                              } else {
+                                                Firestore.instance
+                                                    .collection('pages')
+                                                    .document(widget.documentID)
+                                                    .collection('post')
+                                                    .document(snapshot
+                                                        .data
+                                                        .documents[index]
+                                                        .documentID)
+                                                    .collection('like')
+                                                    .document(
+                                                        "5arJBmgyMNlJgLKyvldS")
+                                                    .delete();
                                                 Firestore.instance
                                                     .collection('ActivtyLog')
                                                     .document('ParentId')

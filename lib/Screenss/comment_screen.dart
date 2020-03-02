@@ -181,10 +181,9 @@ class _CommentState extends State<Comment> {
                           .collection('pages')
                           .document(widget.documentID)
                           .collection('post')
-                          .document(widget.documentID)
+                          .document(widget.postId)
                           .collection('comment')
-                          .document()
-                          .setData({
+                          .add({
                         'comment_content':
                             _commentController.currentState.value,
                         'userid': "5arJBmgyMNlJgLKyvldS",
@@ -195,8 +194,7 @@ class _CommentState extends State<Comment> {
                           .collection('ActivtyLog')
                           .document('ParentId')
                           .collection('ActivtyLogitem')
-                          .document()
-                          .setData({
+                          .add({
                         'comment_content':
                             _commentController.currentState.value,
                         'userid': "5arJBmgyMNlJgLKyvldS",

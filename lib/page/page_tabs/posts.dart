@@ -46,12 +46,12 @@ class _PostsState extends State<Posts> {
   }
 
   Widget _post() {
-    return FutureBuilder(
-        future: Firestore.instance
+    return StreamBuilder(
+        stream: Firestore.instance
             .collection('pages')
             .document(widget.documentID)
             .collection('post')
-            .getDocuments(),
+            .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
